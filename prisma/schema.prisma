@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String    @id @default(cuid())
+  name      String
+  users     User[]
+  projects  Project[]
+  createdAt DateTime  @default(now())
+}
+
+model User {
+  id             String   @id @default(cuid())
+  name           String
+  initials       String
+  email          String   @unique
+  role           String
+  avatarColor    String   @default("#1264A3")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  memberships    ProjectMember[]
+  messages       Message[]
+  reactions      Reaction[]
+  tasksAssigned  Task[]           @relation("TaskAssignee")
+  tasksCreated   Task[]           @relation("TaskCreator")
+  photos         Photo[]
+  notifications  Notification[]
+  createdAt      DateTime @default(now())
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  name         String
+  clientName   String
+  phase        String
+  status       String        @default("ACTIVE")
+  address      String?
+  color        String        @default("#1264A3")
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  organizationId String
+
+  members      ProjectMember[]
+  messages     Message[]
+  tasks        Task[]
+  issues       Issue[]
+  materials    MaterialItem[]
+  notes        Note[]
+  documents    Document[]
+  prints       Print[]
+  photos       Photo[]
+  checklists   Checklist[]
+  dailyLogs    DailyLog[]
+  measurements Measurement[]
+  inspections  Inspection[]
+  safetyItems  SafetyItem[]
+  references   ReferenceItem[]
+  notifications Notification[]
+
+  createdAt    DateTime @default(now())
+}
+
+model ProjectMember {
+  id        String  @id @default(cuid())
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  unreadCount Int   @default(0)
+
+  @@unique([projectId, userId])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    String
+  body        String
+  createdAt   DateTime @default(now())
+  parentId    String?
+  parent      Message? @relation("Replies", fields: [parentId], references: [id])
+  replies     Message[] @relation("Replies")
+  reactions   Reaction[]
+  attachmentUrl  String?
+  attachmentType String?
+  attachmentName String?
+  convertedTo    String?
+  convertedRefId String?
+  pinned      Boolean  @default(false)
+}
+
+model Reaction {
+  id        String  @id @default(cuid())
+  emoji     String
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@unique([messageId, userId, emoji])
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  project     Project    @relation(fields: [projectId], references: [id])
+  projectId   String
+  title       String
+  description String?
+  status      String   @default("NOT_STARTED")
+  assignee    User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigneeId  String?
+  creator     User?      @relation("TaskCreator", fields: [creatorId], references: [id])
+  creatorId   String?
+  dueDate     DateTime?
+  official    Boolean    @default(true)
+  fromMessage Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+}
+
+model Issue {
+  id          String   @id @default(cuid())
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  title       String
+  description String?
+  severity    String   @default("NEEDS_ATTENTION")
+  status      String   @default("NOT_STARTED")
+  reportedBy  String
+  official    Boolean  @default(true)
+  fromMessage Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model MaterialItem {
+  id          String     @id @default(cuid())
+  project     Project    @relation(fields: [projectId], references: [id])
+  projectId   String
+  name        String
+  quantity    String
+  status      String   @default("NOT_STARTED")
+  official    Boolean    @default(true)
+  requestedBy String?
+  notes       String?
+  fromMessage Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  title     String
+  body      String
+  official  Boolean  @default(false)
+  authorName String
+  createdAt DateTime @default(now())
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  name      String
+  fileType  String
+  size      String
+  official  Boolean  @default(true)
+  uploadedBy String
+  createdAt DateTime @default(now())
+}
+
+model Print {
+  id         String   @id @default(cuid())
+  project    Project  @relation(fields: [projectId], references: [id])
+  projectId  String
+  name       String
+  sheetNo    String
+  revision   String
+  discipline String
+  uploadedBy String
+  createdAt  DateTime @default(now())
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  caption   String
+  color     String   @default("#1264A3")
+  uploader  User?    @relation(fields: [uploaderId], references: [id])
+  uploaderId String?
+  createdAt DateTime @default(now())
+}
+
+model Checklist {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  title     String
+  items     ChecklistItem[]
+  createdAt DateTime @default(now())
+}
+
+model ChecklistItem {
+  id          String    @id @default(cuid())
+  checklist   Checklist @relation(fields: [checklistId], references: [id])
+  checklistId String
+  label       String
+  done        Boolean   @default(false)
+}
+
+model DailyLog {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  date      DateTime
+  weather   String?
+  crewCount Int
+  summary   String
+  author    String
+  createdAt DateTime @default(now())
+}
+
+model Measurement {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  label     String
+  value     String
+  location  String?
+  createdAt DateTime @default(now())
+}
+
+model Inspection {
+  id          String     @id @default(cuid())
+  project     Project    @relation(fields: [projectId], references: [id])
+  projectId   String
+  title       String
+  inspector   String?
+  scheduledAt DateTime?
+  status      String   @default("NOT_STARTED")
+  notes       String?
+  createdAt   DateTime   @default(now())
+}
+
+model SafetyItem {
+  id          String     @id @default(cuid())
+  project     Project    @relation(fields: [projectId], references: [id])
+  projectId   String
+  title       String
+  severity    String     @default("NEEDS_ATTENTION")
+  reportedBy  String
+  description String
+  resolved    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+}
+
+model ReferenceItem {
+  id        String   @id @default(cuid())
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String
+  code      String
+  title     String
+  summary   String
+  category  String
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+  type      String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
