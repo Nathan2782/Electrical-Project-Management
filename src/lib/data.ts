@@ -57,6 +57,22 @@ export async function getProjectDetail(projectId: string) {
   return { project, openIssues, materialNeeds, pinnedMessages, todayTasks };
 }
 
+export async function getCrewRoster(organizationId: string) {
+  const [users, projects] = await Promise.all([
+    db.user.findMany({
+      where: { organizationId },
+      include: { memberships: { select: { projectId: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    db.project.findMany({
+      where: { organizationId },
+      select: { id: true, name: true, color: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+  return { users, projects };
+}
+
 export async function getMyOpenTasks(userId: string) {
   return db.task.findMany({
     where: { assigneeId: userId, status: { not: "COMPLETE" } },

@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   Search,
   Bell,
+  Users,
   ChevronDown,
   ChevronRight,
   Zap,
@@ -16,7 +17,7 @@ import clsx from "clsx";
 import { SIDEBAR_PROJECT_SECTIONS } from "@/lib/nav";
 import { ProfileMenu } from "@/components/profile/profile-menu";
 import type { ShellProject, ShellUser } from "@/components/shell/app-shell";
-import type { RoleId } from "@/lib/roles";
+import { isForeman, type RoleId } from "@/lib/roles";
 
 function WorkspaceLink({
   href,
@@ -110,6 +111,9 @@ export function SidebarContent({
             active={pathname === "/notifications"}
             badge={totalUnread}
           />
+          {isForeman(activeRole) && (
+            <WorkspaceLink href="/crew" icon={Users} label="Crew" active={pathname === "/crew"} />
+          )}
         </div>
 
         <div className="flex items-center justify-between px-2.5 pb-1.5">

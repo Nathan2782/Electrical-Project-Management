@@ -2,20 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import {
-  Plus,
-  NotebookPen,
-  Camera,
-  Boxes,
-  ScanSearch,
-  CheckSquare,
-  Ruler,
-  ShieldAlert,
-  ShieldQuestion,
-  HelpCircle,
-  Megaphone,
-  X,
-} from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { TaskForm } from "@/components/forms/task-form";
 import { MaterialForm } from "@/components/forms/material-form";
@@ -27,31 +14,9 @@ import { SafetyForm } from "@/components/forms/safety-form";
 import { MessageForm } from "@/components/forms/message-form";
 import type { ShellProject } from "@/components/shell/app-shell";
 import type { RoleId } from "@/lib/roles";
+import { quickActionsForRole, type QuickActionKey } from "@/lib/nav";
 
-type ActionKey =
-  | "note"
-  | "photo"
-  | "material"
-  | "identify-material"
-  | "task"
-  | "measurement"
-  | "issue"
-  | "safety"
-  | "question"
-  | "update";
-
-const ACTIONS: { key: ActionKey; label: string; icon: typeof Plus }[] = [
-  { key: "update", label: "Post Update", icon: Megaphone },
-  { key: "question", label: "Ask Question", icon: HelpCircle },
-  { key: "task", label: "Create Task", icon: CheckSquare },
-  { key: "material", label: "Add Material", icon: Boxes },
-  { key: "identify-material", label: "Identify Material", icon: ScanSearch },
-  { key: "photo", label: "Take Photo", icon: Camera },
-  { key: "note", label: "Add Note", icon: NotebookPen },
-  { key: "measurement", label: "Add Measurement", icon: Ruler },
-  { key: "issue", label: "Report Issue", icon: ShieldQuestion },
-  { key: "safety", label: "Report Safety Issue", icon: ShieldAlert },
-];
+type ActionKey = QuickActionKey;
 
 export function QuickActionFab({
   currentProjectId,
@@ -74,7 +39,8 @@ export function QuickActionFab({
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const action = ACTIONS.find((a) => a.key === activeAction);
+  const actions = quickActionsForRole(activeRole);
+  const action = actions.find((a) => a.key === activeAction);
 
   return (
     <>
@@ -101,7 +67,7 @@ export function QuickActionFab({
                 </div>
               </div>
             ) : (
-              ACTIONS.map((a) => (
+              actions.map((a) => (
                 <button
                   key={a.key}
                   onClick={() => {

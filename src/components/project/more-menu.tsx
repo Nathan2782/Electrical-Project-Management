@@ -5,21 +5,28 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MoreHorizontal, Settings, ChevronRight } from "lucide-react";
 import clsx from "clsx";
-import { MORE_SECTIONS } from "@/lib/nav";
+import { moreSectionsForRole } from "@/lib/nav";
 import { isForeman, type RoleId } from "@/lib/roles";
+import { Modal } from "@/components/ui/modal";
+import { ProjectSettingsForm } from "@/components/forms/project-settings-form";
+import type { ProjectSummary } from "@/components/project/project-workspace-shell";
 
 export function MoreMenu({
   projectId,
+  project,
   activeRole,
   trigger,
 }: {
   projectId: string;
+  project: ProjectSummary;
   activeRole: RoleId;
   trigger?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const moreSections = moreSectionsForRole(activeRole);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -46,7 +53,7 @@ export function MoreMenu({
           <p className="px-3 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
             Project Tools
           </p>
-          {MORE_SECTIONS.map((section) => {
+          {moreSections.map((section) => {
             const href = `/projects/${projectId}/${section.slug}`;
             const active = pathname === href;
             return (
@@ -70,9 +77,11 @@ export function MoreMenu({
             <>
               <div className="my-1.5 h-px bg-[var(--color-border)]" />
               <button
-                disabled
-                title="Not available in this demo workspace"
-                className="flex w-full cursor-not-allowed items-center justify-between px-3 py-2 text-[13px] text-[var(--color-text-muted)]"
+                onClick={() => {
+                  setOpen(false);
+                  setSettingsOpen(true);
+                }}
+                className="flex w-full items-center justify-between px-3 py-2 text-[13px] text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]"
               >
                 <span className="flex items-center gap-2.5">
                   <Settings size={15} />
@@ -83,6 +92,11 @@ export function MoreMenu({
             </>
           )}
         </div>
+      )}
+      {settingsOpen && (
+        <Modal title="Project Settings" onClose={() => setSettingsOpen(false)}>
+          <ProjectSettingsForm project={project} onDone={() => setSettingsOpen(false)} />
+        </Modal>
       )}
     </div>
   );

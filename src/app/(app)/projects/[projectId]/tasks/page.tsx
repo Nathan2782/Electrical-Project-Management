@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
+import { getActiveRole } from "@/lib/session";
 import { TaskBoard } from "@/components/tasks/task-board";
 
 export default async function TasksPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  const [tasks, issues, members] = await Promise.all([
+  const [tasks, issues, members, activeRole] = await Promise.all([
     db.task.findMany({
       where: { projectId },
       include: { assignee: true },
@@ -11,11 +12,13 @@ export default async function TasksPage({ params }: { params: Promise<{ projectI
     }),
     db.issue.findMany({ where: { projectId }, orderBy: { createdAt: "desc" } }),
     db.projectMember.findMany({ where: { projectId }, include: { user: true } }),
+    getActiveRole(),
   ]);
 
   return (
     <TaskBoard
       projectId={projectId}
+      activeRole={activeRole}
       tasks={tasks.map((t) => ({
         id: t.id,
         title: t.title,

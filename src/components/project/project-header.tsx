@@ -10,7 +10,7 @@ import type {
   ProjectMemberSummary,
   ProjectSummary,
 } from "@/components/project/project-workspace-shell";
-import type { RoleId } from "@/lib/roles";
+import { ROLE_LABELS, ROLE_SHORT_LABELS, type RoleId } from "@/lib/roles";
 
 const STATUS_DOT: Record<string, string> = {
   ACTIVE: "var(--color-status-active)",
@@ -55,6 +55,15 @@ export function ProjectHeader({
         </p>
       </div>
 
+      <span
+        className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--color-primary-tint)] px-2.5 py-1 text-[11.5px] font-semibold text-[var(--color-primary)]"
+        title="Your active role — switch it from the profile menu"
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+        <span className="hidden sm:inline">{ROLE_LABELS[activeRole]}</span>
+        <span className="sm:hidden">{ROLE_SHORT_LABELS[activeRole]}</span>
+      </span>
+
       <div className="flex shrink-0 items-center gap-0.5">
         <Link
           href="/search"
@@ -76,6 +85,7 @@ export function ProjectHeader({
         </button>
         <MoreMenu
           projectId={project.id}
+          project={project}
           activeRole={activeRole}
           trigger={
             <span className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-[var(--color-bg-subtle)]">

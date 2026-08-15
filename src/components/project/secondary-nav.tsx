@@ -5,14 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import clsx from "clsx";
-import { PRIMARY_SECTIONS, MORE_SECTIONS } from "@/lib/nav";
+import { primarySectionsForRole, moreSectionsForRole } from "@/lib/nav";
 import { MoreMenu } from "@/components/project/more-menu";
 import type { RoleId } from "@/lib/roles";
+import type { ProjectSummary } from "@/components/project/project-workspace-shell";
 
-export function SecondaryNav({ projectId, activeRole }: { projectId: string; activeRole: RoleId }) {
+export function SecondaryNav({ project, activeRole }: { project: ProjectSummary; activeRole: RoleId }) {
+  const projectId = project.id;
   const pathname = usePathname();
   const activeRef = useRef<HTMLAnchorElement>(null);
-  const activeMoreSection = MORE_SECTIONS.find(
+  const primarySections = primarySectionsForRole(activeRole);
+  const activeMoreSection = moreSectionsForRole(activeRole).find(
     (s) => pathname === `/projects/${projectId}/${s.slug}`
   );
 
@@ -22,7 +25,7 @@ export function SecondaryNav({ projectId, activeRole }: { projectId: string; act
 
   return (
     <div className="flex shrink-0 items-center gap-0.5 overflow-x-auto border-b border-[var(--color-border)] bg-white px-2">
-      {PRIMARY_SECTIONS.map((section) => {
+      {primarySections.map((section) => {
         const href = `/projects/${projectId}/${section.slug}`;
         const active = pathname === href;
         return (
@@ -47,6 +50,7 @@ export function SecondaryNav({ projectId, activeRole }: { projectId: string; act
       })}
       <MoreMenu
         projectId={projectId}
+        project={project}
         activeRole={activeRole}
         trigger={
           <span

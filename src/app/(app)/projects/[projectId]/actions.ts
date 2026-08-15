@@ -335,6 +335,26 @@ export async function resolveSafetyItemAction(itemId: string, projectId: string,
   refresh(projectId);
 }
 
+// ---------- Project settings (Foreman-only) ----------
+
+export async function updateProjectAction(
+  projectId: string,
+  data: { name: string; clientName: string; phase: string; status: string; address?: string }
+) {
+  if (!data.name.trim() || !data.clientName.trim() || !data.phase.trim()) return;
+  await db.project.update({
+    where: { id: projectId },
+    data: {
+      name: data.name.trim(),
+      clientName: data.clientName.trim(),
+      phase: data.phase.trim(),
+      status: data.status,
+      address: data.address?.trim() || null,
+    },
+  });
+  refresh(projectId);
+}
+
 // ---------- Issues ----------
 
 export async function createIssueAction(

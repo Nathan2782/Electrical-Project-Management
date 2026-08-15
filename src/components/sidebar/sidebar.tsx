@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutGrid, Search, Bell, PanelLeft, Zap } from "lucide-react";
+import { Home, LayoutGrid, Search, Bell, Users, PanelLeft, Zap } from "lucide-react";
 import clsx from "clsx";
 import { SidebarContent } from "@/components/sidebar/sidebar-content";
 import type { ShellProject, ShellUser } from "@/components/shell/app-shell";
-import type { RoleId } from "@/lib/roles";
+import { isForeman, type RoleId } from "@/lib/roles";
 
 export function Sidebar({
   collapsed,
@@ -24,7 +24,14 @@ export function Sidebar({
   currentProjectId?: string;
 }) {
   if (collapsed) {
-    return <CollapsedRail onExpand={onToggleCollapsed} projects={projects} currentProjectId={currentProjectId} />;
+    return (
+      <CollapsedRail
+        onExpand={onToggleCollapsed}
+        projects={projects}
+        activeRole={activeRole}
+        currentProjectId={currentProjectId}
+      />
+    );
   }
 
   return (
@@ -49,10 +56,12 @@ export function Sidebar({
 function CollapsedRail({
   onExpand,
   projects,
+  activeRole,
   currentProjectId,
 }: {
   onExpand: () => void;
   projects: ShellProject[];
+  activeRole: RoleId;
   currentProjectId?: string;
 }) {
   const pathname = usePathname();
@@ -73,6 +82,9 @@ function CollapsedRail({
         <RailLink href="/projects" icon={LayoutGrid} active={pathname === "/projects"} />
         <RailLink href="/search" icon={Search} active={pathname === "/search"} />
         <RailLink href="/notifications" icon={Bell} active={pathname === "/notifications"} badge={totalUnread} />
+        {isForeman(activeRole) && (
+          <RailLink href="/crew" icon={Users} active={pathname === "/crew"} />
+        )}
       </div>
 
       <div className="my-3 h-px w-8 bg-[var(--color-sidebar-border)]" />

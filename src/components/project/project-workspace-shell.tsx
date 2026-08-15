@@ -69,7 +69,7 @@ export function ProjectWorkspaceShell({
           rightPanelOpen={rightPanelOpen}
           onToggleRightPanel={() => setRightPanelOpen((v) => !v)}
         />
-        <SecondaryNav projectId={project.id} activeRole={activeRole} />
+        <SecondaryNav project={project} activeRole={activeRole} />
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       </div>
       {rightPanelOpen && (
