@@ -1,39 +1,46 @@
 # Voltline — Electrical Project Workspace
 
-A Slack-style project workspace built for electrical contractors, foremen, journeymen, apprentices, and crews. Work is organized around **Projects**, not individual conversations — every project is its own workspace with a team conversation plus Prints, Notes & Materials, Tasks, Photos, Documents, and field tools (Checklists, Daily Logs, Inspections, Safety, Measurements, References).
+A Slack-style project workspace built for electrical contractors, foremen, journeymen, apprentices, and crews. Work is organized around **Projects**, not individual conversations. Each project has a team conversation plus Prints, Notes & Materials, Tasks, Photos, Documents, and field tools.
 
 ## Stack
 
-- **Next.js 16** (App Router, Server Actions) + **TypeScript**
-- **Tailwind CSS v4** — blue-and-white design system defined as CSS tokens in `src/app/globals.css`
-- **Prisma + SQLite** for persistence (`prisma/schema.prisma`)
-- No auth system: the signed-in person is a single seeded Foreman account. The profile menu's **Switch Role** lets you preview the workspace as any role (Foreman/Admin, Electrical Contractor, Journeyman, Apprentice, Crew Member) to see how navigation and permissions change.
+- **Next.js 16** App Router + TypeScript
+- **Tailwind CSS v4**
+- **Prisma + PostgreSQL** for persistence
+- Vercel-ready production build
+- No authentication system in this demo. The seeded Foreman account is used as the current session.
 
-## Getting started
+## Local development
 
 ```bash
-npm install
-npm run db:push   # create the SQLite schema
-npm run db:seed   # seed sample org, users, and 3 projects
+npm ci
+npm run db:push
+npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open `http://localhost:3000`.
 
-Useful scripts:
+## Vercel deployment
 
+1. Import this repository into Vercel.
+2. Keep the framework as **Next.js**.
+3. Add a hosted PostgreSQL database and set `DATABASE_URL` in the Vercel project environment variables for **Production**, **Preview**, and **Development** as needed.
+4. Deploy. The repository includes `vercel.json` with the Next.js install and build commands.
+
+The production build runs `prisma generate && next build`. Do not use SQLite in Vercel serverless production because the filesystem is ephemeral. Use PostgreSQL through `DATABASE_URL` as defined by `prisma/schema.prisma`.
+
+## Useful scripts
+
+- `npm run db:push` — apply the Prisma schema
+- `npm run db:seed` — seed the demo workspace
 - `npm run db:reset` — wipe and reseed the database
 - `npm run build` — production build
 - `npm run lint` — ESLint
 
 ## Project structure
 
-- `src/app/(app)/` — the authenticated workspace: shell layout, Home, Projects, Search, Notifications, and the per-project routes under `projects/[projectId]/`
-- `src/components/shell/`, `sidebar/`, `topbar/`, `project/` — the Slack-style three-pane layout (left nav, center workspace, collapsible right info panel)
-- `src/components/conversation/` — the project chat feed, reactions, replies, and the Foreman-only **Convert → Task / Material Request / Issue** workflow
-- `src/components/forms/` — shared quick-entry forms reused by both the section pages and the global Quick Action (+) button
-- `src/lib/` — Prisma client, session/role helpers, status + nav config, search
-
-## Notes on scope
-
-File uploads (prints, documents, photos) aren't wired to blob storage in this build — adding one of these creates a metadata record so the UI and workflows are fully there, but there's no real file behind it yet.
+- `src/app/(app)/` — workspace routes and project pages
+- `src/components/` — shell, sidebar, conversation, forms, and project UI
+- `src/lib/` — Prisma client, session/role helpers, navigation, status, and search
+- `prisma/` — PostgreSQL schema and seed data
