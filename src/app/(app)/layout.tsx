@@ -2,6 +2,10 @@ import { getCurrentUser, getActiveRole } from "@/lib/session";
 import { getProjectsForUser, getUnreadNotificationCount } from "@/lib/data";
 import { AppShell } from "@/components/shell/app-shell";
 
+// Every route in this group reads live DB state and the role-preview cookie
+// on each request — never prerender it at build time.
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   const [activeRole, projects, unreadNotifCount] = await Promise.all([
